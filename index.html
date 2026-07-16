@@ -495,8 +495,8 @@
 
             <div class="form-grid-2">
                 <div class="input-row">
-                    <span class="label-text">⏳ Años trabajando el crédito</span>
-                    <input type="number" id="antiguedad" class="input-pill" placeholder="Ej. 2">
+                    <span class="label-text">🔄 Número de Ciclos</span>
+                    <input type="number" id="ciclos" class="input-pill" placeholder="Ej. 6">
                 </div>
                 <div class="input-row">
                     <span class="label-text">🚨 Pago por cada $1,000 actual</span>
@@ -562,7 +562,7 @@
             <div class="display-card display-card-dark">
                 <h3>DINERO POR INTERESES EN LA OTRA INSTITUCIÓN (acumulado)</h3>
                 <div class="amount-value" id="impactoHistorico">-</div>
-                <p id="descHistorico">todo el dinero que el grupo ha pagado de mas durante los años.</p>
+                <p id="descHistorico">todo el dinero que el grupo ha pagado de mas durante los ciclos.</p>
             </div>
         </div>
     </div>
@@ -619,7 +619,7 @@
         const monto = obtenerValorNumerico('monto');
         const plazo = parseInt(document.getElementById('plazo').value) || 0;
         const pools = document.getElementById('periodicidad').value;
-        const antiguedad = parseFloat(document.getElementById('antiguedad').value) || 0;
+        const ciclos = parseInt(document.getElementById('ciclos').value) || 0;
         const tasaOtros = obtenerValorNumerico('tasaOtros');
 
         const tasaAcreimexDinamica = TABLA_TASAS_ACREIMEX[pools][plazo.toString()] || 68.41;
@@ -642,13 +642,8 @@
 
         const totalFugaGrupoCiclo = cicDiff * integrantes;
 
-        let semanasEquivalentes = 1;
-        if (pools === 'catorcenal') semanasEquivalentes = 2;
-        if (pools === 'quincenal') semanasEquivalentes = 2.166; 
-
-        const semanasTotalesDelCiclo = plazo * semanasEquivalentes;
-        const ciclosAnuales = 52 / semanasTotalesDelCiclo;
-        const totalHistoricoPerdido = totalFugaGrupoCiclo * (ciclosAnuales * antiguedad);
+        // Ahora el cálculo acumulado es exacto: pérdida del ciclo entero multiplicado por los ciclos ingresados
+        const totalHistoricoPerdido = totalFugaGrupoCiclo * ciclos;
 
         baseDatosDinamica = {
             mil: { 
@@ -672,7 +667,7 @@
         document.getElementById('descFuga').innerText = `Pérdida total del grupo de ${integrantes} integrantes durante el ciclo de ${plazo} cuotas de forma ${pools}.`;
 
         document.getElementById('impactoHistorico').innerText = moneyFormatter.format(totalHistoricoPerdido);
-        document.getElementById('descHistorico').innerText = `Capital total perdido en ${antiguedad} años de antigüedad estimado (~${(ciclosAnuales * antiguedad).toFixed(1)} ciclos).`;
+        document.getElementById('descHistorico').innerText = `Capital total perdido acumulado estimado durante ${ciclos} ciclos de trabajo con el grupo.`;
 
         const seccionResultados = document.getElementById('resultsSection');
         seccionResultados.style.display = 'flex';
