@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -722,7 +722,63 @@
         let valorLimpio = elemento.value.replace(/,/g, '');
         return parseFloat(valorLimpio) || 0;
     }
-</script>
 
+ /* --- REGISTRO DE SERVICE WORKER --- */
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("./sw.js")
+            .then(registration => {
+                registration.onupdatefound = () => {
+                    const newWorker = registration.installing;
+
+                    newWorker.onstatechange = () => {
+                        if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+
+                            const updateBanner = document.createElement("div");
+                            updateBanner.innerHTML = `
+                                <div style="
+                                    position: fixed;
+                                    bottom: 20px;
+                                    left: 50%;
+                                    transform: translateX(-50%);
+                                    background: #0f172a;
+                                    color: white;
+                                    padding: 15px 20px;
+                                    border-radius: 12px;
+                                    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+                                    z-index: 9999;
+                                    font-family: sans-serif;
+                                ">
+                                    🔄 Nueva versión disponible
+                                    <button id="updateBtn" style="
+                                        margin-left: 15px;
+                                        padding: 6px 12px;
+                                        border: none;
+                                        background: #22c55e;
+                                        color: white;
+                                        border-radius: 8px;
+                                        cursor: pointer;
+                                    ">Actualizar</button>
+                                </div>
+                            `;
+                            document.body.appendChild(updateBanner);
+
+                            document.getElementById("updateBtn").addEventListener("click", () => {
+                                window.location.reload();
+                            });
+                        }
+                    };
+                };
+            })
+            .catch(err => console.error("Error al registrar el Service Worker:", err));
+
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+            if (!refreshing) {
+                window.location.reload();
+                refreshing = true;
+            }
+        });
+    }
+</script>
 </body>
 </html>
